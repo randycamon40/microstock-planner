@@ -1,0 +1,14 @@
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    ContentType = "application/json"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    ContentType = "application/manifest+json"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

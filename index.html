@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Microstock Planner — Kalender Event & Jadwal Menggambar</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #f1f5f9;
+    --text: #0f172a;
+    --text-2: #334155;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --border-2: #cbd5e1;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-soft: #eef2ff;
+    --pink: #ec4899;
+    --pink-soft: #fdf2f8;
+    --blue: #3b82f6;
+    --blue-soft: #eff6ff;
+    --green: #10b981;
+    --green-soft: #ecfdf5;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --red-soft: #fef2f2;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+    --shadow: 0 4px 14px rgba(15,23,42,.08);
+    --shadow-lg: 0 20px 40px rgba(15,23,42,.18);
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-full: 999px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  [data-theme="dark"] {
+    --bg: #0b1220;
+    --surface: #111c2e;
+    --surface-2: #0f172a;
+    --surface-3: #1e293b;
+    --text: #f1f5f9;
+    --text-2: #cbd5e1;
+    --muted: #94a3b8;
+    --border: #1e293b;
+    --border-2: #334155;
+    --primary: #818cf8;
+    --primary-hover: #6366f1;
+    --primary-soft: #312e81;
+    --pink-soft: #831843;
+    --blue-soft: #1e3a8a;
+    --green-soft: #064e3b;
+    --red-soft: #7f1d1d;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    --shadow: 0 4px 14px rgba(0,0,0,.5);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,.7);
+  }
+
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    line-height: 1.5;
+  }
+  button, input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
+  button { cursor: pointer; border: none; background: none; }
+  input, textarea { outline: none; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* APP SHELL */
+  .app { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: calc(20px + var(--safe-bottom)); }
+
+  /* HEADER */
+  .app-header {
+    position: sticky; top: 0; z-index: 50;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    color: white;
+    padding: calc(12px + var(--safe-top)) 16px 12px;
+    box-shadow: 0 4px 20px rgba(99,102,241,.28);
+  }
+  .header-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+  .brand-logo {
+    width: 36px; height: 36px; display: grid; place-items: center;
+    background: rgba(255,255,255,.18); border-radius: 10px; font-size: 1.1rem;
+    flex-shrink: 0; backdrop-filter: blur(8px);
+  }
+  .brand-text { min-width: 0; }
+  .brand-title { font-size: .95rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-sub { font-size: .7rem; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn {
+    width: 38px; height: 38px; display: grid; place-items: center;
+    background: rgba(255,255,255,.18); color: white; border-radius: 10px;
+    font-size: 1rem; transition: background .15s, transform .1s; backdrop-filter: blur(8px);
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.3); }
+  .icon-btn:active { transform: scale(.94); }
+  .icon-btn:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+
+  /* LAYOUT */
+  .app-layout { flex: 1; padding: 12px 12px 0; max-width: 1400px; width: 100%; margin: 0 auto; }
+  @media (min-width: 1024px) {
+    .app-layout { display: grid; grid-template-columns: 340px 1fr; gap: 18px; padding: 18px; }
+  }
+
+  /* SETTINGS PANEL */
+  .settings-panel {
+    position: fixed; inset: 0; z-index: 300;
+    background: var(--surface);
+    transform: translateX(-100%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+    padding: calc(16px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+    -webkit-overflow-scrolling: touch;
+    visibility: hidden;
+  }
+  .settings-panel.open { transform: translateX(0); visibility: visible; }
+  .settings-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .settings-panel-title { font-size: 1.05rem; font-weight: 700; }
+  .drawer-close {
+    width: 36px; height: 36px; display: grid; place-items: center;
+    background: var(--surface-3); color: var(--muted); border-radius: 10px;
+    font-size: 1.2rem; transition: all .15s;
+  }
+  .drawer-close:hover { background: var(--red-soft); color: var(--red); }
+
+  @media (min-width: 1024px) {
+    .settings-panel {
+      position: sticky; top: calc(60px + 18px); inset: auto;
+      transform: none !important; visibility: visible !important;
+      max-height: calc(100vh - 90px);
+      padding: 18px; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+      overflow-y: auto;
+    }
+    .settings-panel-header { display: none; }
+  }
+
+  /* SETTINGS CONTENT */
+  .section-title {
+    font-size: .72rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em;
+    margin: 18px 0 10px;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  .field { margin-bottom: 14px; }
+  .field > label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+  .field-hint { font-size: .68rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .input {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--surface-2); font-size: .9rem;
+    transition: border-color .15s, background .15s;
+  }
+  .input:focus { border-color: var(--primary); background: var(--surface); }
+  .input-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .input-row > div > label {
+    display: block; font-size: .68rem; font-weight: 600;
+    color: var(--muted); margin-bottom: 4px; text-transform: uppercase;
+  }
+
+  .chips { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .chip {
+    padding: 9px 4px; border: 1.5px solid var(--border);
+    background: var(--surface-2); border-radius: 9px;
+    font-size: .72rem; font-weight: 700; color: var(--muted);
+    transition: all .15s; text-align: center;
+  }
+  .chip.active {
+    background: var(--primary); border-color: var(--primary);
+    color: white; box-shadow: 0 3px 8px rgba(99,102,241,.35);
+  }
+  .chip:active { transform: scale(.95); }
+  .chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .radio-list { display: flex; flex-direction: column; gap: 6px; }
+  .radio-opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border: 1.5px solid var(--border);
+    border-radius: 10px; background: var(--surface-2);
+    cursor: pointer; transition: all .15s;
+  }
+  .radio-opt:hover { border-color: var(--border-2); }
+  .radio-opt input { margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; }
+  .radio-opt:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+  .radio-label-main { font-size: .85rem; font-weight: 600; line-height: 1.3; }
+  .radio-label-desc { font-size: .72rem; color: var(--muted); margin-top: 2px; line-height: 1.35; }
+
+  .btn {
+    width: 100%; padding: 12px 14px; border-radius: 10px;
+    font-size: .88rem; font-weight: 600; transition: all .15s;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; min-height: 44px;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .btn-primary { background: linear-gradient(135deg, var(--primary), var(--pink)); color: white; box-shadow: 0 4px 14px rgba(99,102,241,.35); }
+  .btn-primary:hover { box-shadow: 0 6px 20px rgba(99,102,241,.45); }
+  .btn-secondary { background: var(--surface-3); color: var(--text-2); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { background: var(--surface-2); border-color: var(--border-2); }
+  .btn-danger { background: var(--surface-3); color: var(--red); border: 1.5px solid var(--border); }
+  .btn-danger:hover { background: var(--red-soft); border-color: var(--red); }
+  .btn-sm { width: auto; padding: 8px 12px; font-size: .8rem; min-height: 36px; }
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn-group { display: flex; flex-direction: column; gap: 8px; }
+
+  /* MAIN CONTENT */
+  .main-content { min-width: 0; padding-bottom: 20px; }
+
+  .month-nav {
+    position: sticky; top: calc(60px + var(--safe-top)); z-index: 30;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border-radius: var(--radius);
+    padding: 8px; box-shadow: var(--shadow-sm); margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .month-nav-btn {
+    width: 40px; height: 40px; display: grid; place-items: center;
+    background: var(--surface-2); color: var(--text-2); border-radius: 10px;
+    font-size: 1.1rem; font-weight: 600; transition: all .15s; flex-shrink: 0;
+  }
+  .month-nav-btn:hover { background: var(--primary); color: white; }
+  .month-nav-btn:active { transform: scale(.94); }
+  .month-nav-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .month-title {
+    flex: 1; text-align: center; font-size: 1.05rem; font-weight: 700;
+    letter-spacing: -.01em;
+    background: linear-gradient(135deg, var(--primary), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+  @media (min-width: 640px) { .month-title { font-size: 1.2rem; } }
+
+  .progress-bar { height: 6px; background: var(--surface-3); border-radius: var(--radius-full); overflow: hidden; margin-bottom: 12px; }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--primary), var(--pink));
+    border-radius: var(--radius-full); transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* CALENDAR */
+  .calendar-panel {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 10px 8px 12px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  @media (min-width: 640px) { .calendar-panel { padding: 14px; } }
+
+  .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
+  .weekday {
+    text-align: center; font-size: .68rem; font-weight: 700;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: .03em; padding: 4px 0;
+  }
+  @media (min-width: 640px) { .weekday { font-size: .72rem; padding: 6px 0; } }
+
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  @media (min-width: 640px) { .calendar-grid { gap: 6px; } }
+
+  .day {
+    position: relative; aspect-ratio: 3 / 4; min-height: 62px;
+    padding: 4px; background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    display: flex; flex-direction: column; overflow: hidden;
+    text-align: left; cursor: pointer;
+    transition: border-color .15s, transform .1s, box-shadow .15s;
+    color: inherit; font-family: inherit;
+  }
+  .day:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .day:active { transform: translateY(0) scale(.98); }
+  .day:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+  @media (min-width: 640px) {
+    .day { aspect-ratio: auto; min-height: 96px; padding: 6px; border-radius: 11px; }
+  }
+  .day.other-month { opacity: .38; background: var(--surface-2); }
+  .day.today {
+    background: linear-gradient(135deg, var(--primary-soft), var(--pink-soft));
+    border-color: var(--primary); border-width: 2px;
+  }
+  .day.weekend:not(.today) { background: var(--surface-2); }
+  .day.all-done::after {
+    content: ''; position: absolute; top: 4px; right: 4px;
+    width: 10px; height: 10px; background: var(--green); border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+
+  .day-num { font-size: .78rem; font-weight: 700; line-height: 1; margin-bottom: 3px; color: var(--text); }
+  .day.today .day-num { color: var(--primary); font-weight: 800; }
+  .day.other-month .day-num { color: var(--muted); }
+  @media (min-width: 640px) { .day-num { font-size: .85rem; margin-bottom: 4px; } }
+
+  .day-events {
+    display: flex; flex-wrap: wrap; gap: 1px; margin-bottom: 2px;
+    font-size: .72rem; line-height: 1; max-height: 16px; overflow: hidden;
+  }
+  @media (min-width: 640px) {
+    .day-events { font-size: .9rem; gap: 3px; max-height: 20px; margin-bottom: 4px; }
+  }
+  .day-event { cursor: help; }
+
+  .day-tasks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: auto; padding-top: 2px; }
+  .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .task-dot.sketch { background: var(--blue); }
+  .task-dot.color  { background: var(--pink); }
+  .task-dot.upload { background: var(--green); }
+  .task-dot.done { opacity: .35; box-shadow: inset 0 0 0 1px var(--surface); }
+  @media (min-width: 640px) { .task-dot { width: 8px; height: 8px; } }
+
+  .day-badges { display: none; }
+  @media (min-width: 900px) {
+    .day-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+    .badge {
+      font-size: .62rem; padding: 2px 5px; border-radius: 5px;
+      font-weight: 700; color: white; line-height: 1.2; white-space: nowrap;
+    }
+    .badge.sketch { background: var(--blue); }
+    .badge.color  { background: var(--pink); }
+    .badge.upload { background: var(--green); }
+    .badge.partial { opacity: .55; }
+  }
+
+  /* STATS */
+  .stats-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 14px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border); margin-top: 12px;
+  }
+  .stats-title {
+    font-size: .8rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat-box { background: var(--surface-2); padding: 10px 8px; border-radius: 10px; text-align: center; }
+  .stat-val { font-size: 1.1rem; font-weight: 800; line-height: 1.1; color: var(--text); }
+  .stat-label { font-size: .68rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+  .stat-box.sketch .stat-val { color: var(--blue); }
+  .stat-box.color .stat-val { color: var(--pink); }
+  .stat-box.upload .stat-val { color: var(--green); }
+  .progress-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; font-size: .8rem; color: var(--muted); }
+  .progress-row strong { color: var(--text); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: none; align-items: flex-end; justify-content: center;
+    padding: 0; animation: fadeIn .18s ease-out;
+  }
+  .modal-overlay.active { display: flex; }
+  @media (min-width: 640px) { .modal-overlay { align-items: center; padding: 20px; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-content {
+    background: var(--surface); width: 100%; max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+    padding: 8px 18px calc(20px + var(--safe-bottom));
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    animation: slideUp .25s cubic-bezier(.4,0,.2,1);
+    position: relative; box-shadow: var(--shadow-lg);
+  }
+  @media (min-width: 640px) {
+    .modal-content {
+      max-width: 560px; border-radius: 20px;
+      padding: 22px; max-height: 88vh;
+      animation: zoomIn .2s ease-out;
+    }
+  }
+  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes zoomIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .modal-handle {
+    width: 40px; height: 4px; background: var(--border-2);
+    border-radius: 2px; margin: 6px auto 12px; display: block;
+  }
+  @media (min-width: 640px) { .modal-handle { display: none; } }
+
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+  .modal-date {
+    font-size: 1.05rem; font-weight: 700; line-height: 1.25;
+    background: linear-gradient(135deg, var(--primary), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .modal-subtitle { font-size: .76rem; color: var(--muted); margin-top: 2px; }
+  .modal-close {
+    width: 36px; height: 36px; display: grid; place-items: center;
+    background: var(--surface-3); color: var(--muted);
+    border-radius: 10px; font-size: 1.2rem; flex-shrink: 0; transition: all .15s;
+  }
+  .modal-close:hover { background: var(--red-soft); color: var(--red); }
+
+  .modal-section { margin-bottom: 20px; }
+  .modal-section-title {
+    font-size: .72rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 10px; display: flex;
+    align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .modal-section-title button {
+    font-size: .72rem; color: var(--primary); font-weight: 700;
+    text-transform: none; letter-spacing: 0; padding: 2px 6px; border-radius: 6px;
+  }
+  .modal-section-title button:hover { background: var(--primary-soft); }
+
+  .event-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #fef3c7, #fce7f3);
+    border-radius: 10px; margin-bottom: 6px;
+    font-size: .88rem; font-weight: 500;
+    position: relative; padding-right: 40px;
+  }
+  [data-theme="dark"] .event-item { background: linear-gradient(135deg, #422006, #4c1d24); color: var(--text); }
+  .event-emoji-lg { font-size: 1.25rem; flex-shrink: 0; }
+  .event-name { flex: 1; min-width: 0; }
+  .event-remove {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 26px; height: 26px; display: grid; place-items: center;
+    color: var(--muted); border-radius: 6px; font-size: 1rem;
+  }
+  .event-remove:hover { background: rgba(239,68,68,.15); color: var(--red); }
+  .event-add-form { display: none; gap: 6px; margin-bottom: 8px; }
+  .event-add-form.show { display: grid; grid-template-columns: 56px 1fr auto; }
+  .event-add-form input {
+    padding: 9px 10px; border: 1.5px solid var(--border);
+    border-radius: 9px; background: var(--surface-2);
+    font-size: .88rem; width: 100%;
+  }
+  .event-add-form input:focus { border-color: var(--primary); background: var(--surface); }
+  .event-add-form .btn { padding: 9px 12px; min-height: auto; width: auto; }
+  .emoji-quick { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .emoji-quick button {
+    width: 30px; height: 30px; display: grid; place-items: center;
+    background: var(--surface-2); border-radius: 7px; font-size: .95rem;
+  }
+  .emoji-quick button:hover { background: var(--primary-soft); }
+
+  .task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 8px;
+    background: var(--surface-2); border-left: 4px solid;
+    position: relative;
+  }
+  .task-item.sketch { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+  .task-item.color  { border-color: var(--pink); background: var(--pink-soft); color: var(--pink); }
+  .task-item.upload { border-color: var(--green); background: var(--green-soft); color: var(--green); }
+  .task-item.complete { opacity: .65; }
+  .task-item.complete .task-name { text-decoration: line-through; }
+  .task-icon { font-size: 1.15rem; flex-shrink: 0; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-weight: 700; font-size: .87rem; line-height: 1.25; color: var(--text); }
+  .task-meta { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+  .task-bar { height: 4px; background: rgba(0,0,0,.08); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  [data-theme="dark"] .task-bar { background: rgba(255,255,255,.1); }
+  .task-bar-fill { height: 100%; background: currentColor; border-radius: 2px; transition: width .3s; }
+
+  .task-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .task-btn {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    background: rgba(255,255,255,.6); border-radius: 8px;
+    color: var(--text); font-size: .95rem; font-weight: 700;
+    transition: all .15s; line-height: 1;
+  }
+  [data-theme="dark"] .task-btn { background: rgba(255,255,255,.08); }
+  .task-btn:hover { background: var(--primary); color: white; }
+  .task-btn:active { transform: scale(.92); }
+  .task-btn.danger:hover { background: var(--red); color: white; }
+  .task-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  .task-progress-num {
+    font-size: .72rem; font-weight: 700; padding: 2px 7px;
+    background: rgba(255,255,255,.75); border-radius: 6px;
+    margin-left: 4px; color: var(--text);
+  }
+  [data-theme="dark"] .task-progress-num { background: rgba(0,0,0,.3); }
+
+  .task-add-form {
+    display: none; gap: 6px; margin-top: 8px; padding: 10px;
+    background: var(--surface-2); border-radius: 10px;
+    border: 1.5px dashed var(--border-2);
+  }
+  .task-add-form.show { display: block; }
+  .task-add-form .row { display: grid; grid-template-columns: 1fr 80px; gap: 6px; margin-bottom: 6px; }
+  .task-add-form select,
+  .task-add-form input {
+    padding: 9px 10px; border: 1.5px solid var(--border);
+    border-radius: 8px; background: var(--surface);
+    font-size: .85rem; width: 100%;
+  }
+
+  .notes-area {
+    width: 100%; min-height: 70px; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--surface-2); font-size: .87rem;
+    resize: vertical; font-family: inherit; line-height: 1.5;
+  }
+  .notes-area:focus { border-color: var(--primary); background: var(--surface); }
+
+  .empty { color: var(--muted); font-style: italic; font-size: .85rem; padding: 8px 0; }
+
+  .idea-hint {
+    margin-top: 10px; padding: 10px 12px;
+    background: linear-gradient(135deg, var(--primary-soft), var(--pink-soft));
+    border-radius: 10px; font-size: .8rem;
+    color: var(--text-2); line-height: 1.45;
+  }
+  [data-theme="dark"] .idea-hint { color: var(--text); }
+  .idea-hint strong { color: var(--primary); }
+
+  /* MICROSTOCK INFO PANEL */
+  .microstock-info {
+    margin-top: 10px; padding: 12px;
+    background: var(--surface-2); border-radius: 10px;
+    border-left: 4px solid var(--orange);
+    font-size: .82rem; line-height: 1.5;
+  }
+  .microstock-info-title {
+    font-weight: 700; color: var(--orange);
+    margin-bottom: 6px; font-size: .8rem;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .microstock-info-tips { color: var(--text-2); margin-bottom: 8px; }
+  .microstock-keywords { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .microstock-keyword {
+    font-size: .7rem; padding: 3px 8px;
+    background: var(--primary-soft); color: var(--primary);
+    border-radius: 20px; font-weight: 600; white-space: nowrap;
+  }
+  [data-theme="dark"] .microstock-keyword { background: rgba(99,102,241,.25); color: #a5b4fc; }
+  [data-theme="dark"] .microstock-info { border-left-color: #fbbf24; }
+  [data-theme="dark"] .microstock-info-title { color: #fbbf24; }
+
+  .total-summary {
+    margin-top: 12px; padding: 10px;
+    background: var(--surface-2); border-radius: 9px;
+    font-size: .82rem; text-align: center; color: var(--muted);
+    border: 1px dashed var(--border-2);
+  }
+  .total-summary strong { color: var(--text); }
+
+  /* SEARCH */
+  .search-wrap { position: relative; margin-bottom: 12px; }
+  .search-input {
+    width: 100%; padding: 11px 40px 11px 38px;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    background: var(--surface); font-size: .88rem;
+  }
+  .search-input:focus { border-color: var(--primary); }
+  .search-icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: .95rem; pointer-events: none;
+  }
+  .search-clear {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 28px; display: none; place-items: center;
+    color: var(--muted); border-radius: 6px; font-size: 1rem;
+  }
+  .search-clear.show { display: grid; }
+  .search-clear:hover { background: var(--surface-3); color: var(--text); }
+
+  .search-results {
+    display: none; background: var(--surface);
+    border-radius: var(--radius); border: 1px solid var(--border);
+    box-shadow: var(--shadow); max-height: 300px;
+    overflow-y: auto; margin-bottom: 12px;
+  }
+  .search-results.show { display: block; }
+  .search-result {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .12s;
+  }
+  .search-result:last-child { border-bottom: none; }
+  .search-result:hover { background: var(--surface-2); }
+  .search-result-emoji { font-size: 1.15rem; flex-shrink: 0; }
+  .search-result-body { flex: 1; min-width: 0; }
+  .search-result-name { font-size: .85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-result-date { font-size: .72rem; color: var(--muted); margin-top: 1px; }
+  .search-empty { padding: 20px; text-align: center; color: var(--muted); font-size: .85rem; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed; bottom: calc(20px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%);
+    z-index: 400; display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none; width: calc(100% - 32px); max-width: 400px;
+  }
+  @media (min-width: 640px) {
+    .toast-container { left: auto; right: 20px; transform: none; }
+  }
+  .toast {
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--surface); color: var(--text);
+    box-shadow: var(--shadow-lg); font-size: .85rem; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    pointer-events: auto; border-left: 4px solid var(--primary);
+    animation: toastIn .3s cubic-bezier(.4,0,.2,1); max-width: 100%;
+  }
+  @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast.out { animation: toastOut .25s ease-in forwards; }
+  @keyframes toastOut { to { transform: translateY(20px); opacity: 0; } }
+  .toast.success { border-left-color: var(--green); }
+  .toast.error   { border-left-color: var(--red); }
+  .toast.warn    { border-left-color: var(--orange); }
+  .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .toast-body { flex: 1; min-width: 0; }
+
+  /* DRAWER BACKDROP */
+  .drawer-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 250; animation: fadeIn .18s;
+  }
+  .drawer-backdrop.show { display: block; }
+  @media (min-width: 1024px) { .drawer-backdrop { display: none !important; } }
+
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+
+<!-- TWA-GENERATOR:START (auto-generated, jangan edit manual) -->
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- Theme & status bar -->
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="color-scheme" content="light dark">
+    <!-- Android / Chrome -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Microstock Planner — Kalender Event &amp; Jadwal Menggambar">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Microstock Planner — Kalender Event &amp; Jadwal Menggambar">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <!-- Favicon fallback -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<!-- TWA-GENERATOR:END -->
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-row">
+      <div class="brand">
+        <div class="brand-logo">🎨</div>
+        <div class="brand-text">
+          <div class="brand-title">Microstock Planner</div>
+          <div class="brand-sub">Event & jadwal menggambar</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn" aria-label="Ganti tema" title="Ganti tema">🌙</button>
+        <button class="icon-btn" id="menuBtn" aria-label="Buka pengaturan" title="Pengaturan">⚙️</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="settings-panel" id="settingsPanel" aria-label="Panel pengaturan">
+      <div class="settings-panel-header">
+        <div class="settings-panel-title">⚙️ Pengaturan</div>
+        <button class="drawer-close" id="settingsClose" aria-label="Tutup">×</button>
+      </div>
+
+      <div class="section-title">🎯 Target Harian</div>
+      <div class="field">
+        <label for="imagesPerDay">Gambar per hari</label>
+        <input class="input" type="number" id="imagesPerDay" min="1" max="50" value="3" inputmode="numeric">
+      </div>
+
+      <div class="field">
+        <label>Hari kerja <span class="field-hint" id="wdCount"></span></label>
+        <div class="chips" id="workdays" role="group" aria-label="Pilih hari kerja"></div>
+      </div>
+
+      <div class="field">
+        <label>Mode jadwal</label>
+        <div class="radio-list">
+          <label class="radio-opt">
+            <input type="radio" name="mode" value="split">
+            <div>
+              <div class="radio-label-main">Bertahap (pipeline)</div>
+              <div class="radio-label-desc">Sketsa → warnai → upload pada hari berbeda</div>
+            </div>
+          </label>
+          <label class="radio-opt">
+            <input type="radio" name="mode" value="same">
+            <div>
+              <div class="radio-label-main">Sama hari</div>
+              <div class="radio-label-desc">Sketsa, warnai & upload di hari yang sama</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="section-title">⏱️ Waktu Kerja</div>
+      <div class="field">
+        <label for="startHour">Jam mulai</label>
+        <input class="input" type="number" id="startHour" min="0" max="23" value="9" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>Durasi per gambar (menit)</label>
+        <div class="input-row">
+          <div>
+            <label for="sketchMin">✏️ Sketsa</label>
+            <input class="input" type="number" id="sketchMin" min="1" value="30" inputmode="numeric">
+          </div>
+          <div>
+            <label for="colorMin">🎨 Warnai</label>
+            <input class="input" type="number" id="colorMin" min="1" value="45" inputmode="numeric">
+          </div>
+          <div>
+            <label for="uploadMin">☁️ Upload</label>
+            <input class="input" type="number" id="uploadMin" min="1" value="15" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">📅 Aksi Jadwal</div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="generateBtn"><span>📅</span> Buat Jadwal Bulan Ini</button>
+        <button class="btn btn-danger" id="clearBtn"><span>🗑️</span> Hapus Jadwal Bulan Ini</button>
+      </div>
+
+      <div class="section-title">💾 Data</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" id="exportBtn">⬇️ Export</button>
+        <button class="btn btn-secondary btn-sm" id="importBtn">⬆️ Import</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json" class="hidden">
+
+      <div class="section-title">❓ Bantuan</div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">
+        Klik tanggal untuk melihat event & jadwal. Tap tugas untuk update progress.
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" type="search" placeholder="Cari event internasional..." aria-label="Cari event">
+        <button class="search-clear" id="searchClear" aria-label="Hapus pencarian">×</button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+
+      <div class="month-nav">
+        <button class="month-nav-btn" id="prevMonth" aria-label="Bulan sebelumnya">‹</button>
+        <div class="month-title" id="monthTitle" aria-live="polite">—</div>
+        <button class="month-nav-btn" id="nextMonth" aria-label="Bulan berikutnya">›</button>
+        <button class="month-nav-btn" id="todayBtn" aria-label="Hari ini" title="Hari ini" style="font-size:.85rem;">◉</button>
+      </div>
+
+      <div class="progress-bar" aria-hidden="true">
+        <div class="progress-fill" id="monthProgress" style="width:0%"></div>
+      </div>
+
+      <div class="calendar-panel">
+        <div class="calendar-weekdays" id="weekdays"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-title">📊 Ringkasan <span id="statsMonth"></span></div>
+        <div class="stats-grid">
+          <div class="stat-box sketch">
+            <div class="stat-val" id="statSketch">0</div>
+            <div class="stat-label">✏️ Sketsa</div>
+          </div>
+          <div class="stat-box color">
+            <div class="stat-val" id="statColor">0</div>
+            <div class="stat-label">🎨 Warnai</div>
+          </div>
+          <div class="stat-box upload">
+            <div class="stat-val" id="statUpload">0</div>
+            <div class="stat-label">☁️ Upload</div>
+          </div>
+        </div>
+        <div class="progress-row">
+          <span>Selesai: <strong id="statDone">0</strong> / <span id="statTotal">0</span></span>
+          <span id="statPercent">0%</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalDate">
+  <div class="modal-content" id="modalContent">
+    <div class="modal-handle" aria-hidden="true"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-date" id="modalDate">—</div>
+        <div class="modal-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Tutup">×</button>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">
+        <span>🌍 Event Internasional</span>
+        <button id="addEventBtn" aria-label="Tambah event">+ Tambah</button>
+      </div>
+      <div class="event-add-form" id="eventAddForm">
+        <input type="text" id="eventEmojiInput" placeholder="🎂" maxlength="4" aria-label="Emoji">
+        <input type="text" id="eventNameInput" placeholder="Nama event..." maxlength="60" aria-label="Nama event">
+        <button class="btn btn-primary" id="eventSaveBtn">✓</button>
+      </div>
+      <div class="emoji-quick" id="emojiQuick"></div>
+      <div id="modalEvents"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">
+        <span>🎨 Jadwal Menggambar</span>
+        <button id="addTaskBtn" aria-label="Tambah tugas">+ Tambah</button>
+      </div>
+      <div id="modalTasks"></div>
+      <div class="task-add-form" id="taskAddForm">
+        <div class="row">
+          <select id="taskTypeInput" aria-label="Jenis tugas">
+            <option value="sketch">✏️ Sketsa</option>
+            <option value="color">🎨 Warnai</option>
+            <option value="upload">☁️ Upload</option>
+          </select>
+          <input type="number" id="taskCountInput" min="1" max="99" value="1" aria-label="Jumlah" inputmode="numeric">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary btn-sm" id="taskCancelBtn">Batal</button>
+          <button class="btn btn-primary btn-sm" id="taskSaveBtn">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title"><span>📝 Catatan</span></div>
+      <textarea class="notes-area" id="notesArea" placeholder="Catatan untuk hari ini..." maxlength="500"></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'microstockPlanner_v3';
+  const MAX_MONTHS_KEPT = 18;
+  const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+  const DAYS_SHORT = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+  const DAYS_FULL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const TASK_ORDER = ['sketch', 'color', 'upload'];
+  const TASK_LABELS = { sketch: 'Sketsa', color: 'Warnai', upload: 'Upload' };
+  const TASK_ICONS = { sketch: '✏️', color: '🎨', upload: '☁️' };
+  const WORKDAY_ORDER = [1,2,3,4,5,6,0];
+  const QUICK_EMOJIS = ['🎂','🎉','🎊','💡','⭐','🔥','💖','🌈','☕','🎵','🏆','✨','📌','🎯','🌟'];
+
+  const INTERNATIONAL_EVENTS = {
+    "01-01": [{ n: "Tahun Baru", e: "🎆" }],
+    "01-04": [{ n: "Hari Braille Sedunia", e: "🔤" }],
+    "01-24": [{ n: "Hari Pendidikan Internasional", e: "📚" }],
+    "01-26": [{ n: "Hari Bea Cukai Internasional", e: "🛃" }],
+    "01-27": [{ n: "Hari Peringatan Holocaust Internasional", e: "🕯️" }],
+    "01-28": [{ n: "Hari Perlindungan Data Sedunia", e: "🔒" }],
+    "02-02": [{ n: "Hari Lahan Basah Sedunia", e: "🌿" }],
+    "02-04": [{ n: "Hari Kanker Sedunia", e: "🎗️" }],
+    "02-10": [{ n: "Hari Kacang-kacangan Sedunia", e: "🥜" }],
+    "02-11": [{ n: "Hari Perempuan dan Sains Internasional", e: "🔬" }],
+    "02-13": [{ n: "Hari Radio Sedunia", e: "📻" }],
+    "02-14": [{ n: "Hari Valentine", e: "💝" }],
+    "02-20": [{ n: "Hari Keadilan Sosial Sedunia", e: "⚖️" }],
+    "02-21": [{ n: "Hari Bahasa Ibu Internasional", e: "🗣️" }],
+    "03-03": [{ n: "Hari Satwa Liar Sedunia", e: "🐘" }],
+    "03-08": [{ n: "Hari Perempuan Internasional", e: "♀️" }],
+    "03-14": [{ n: "Hari Matematika Internasional (Pi Day)", e: "🥧" }],
+    "03-15": [{ n: "Hari Konsumen Sedunia", e: "🛒" }],
+    "03-20": [{ n: "Hari Kebahagiaan Sedunia", e: "😊" }],
+    "03-21": [{ n: "Hari Hutan Sedunia", e: "🌳" }, { n: "Hari Down Syndrome Sedunia", e: "🧦" }],
+    "03-22": [{ n: "Hari Air Sedunia", e: "💧" }],
+    "03-23": [{ n: "Hari Meteorologi Sedunia", e: "⛅" }],
+    "03-24": [{ n: "Hari Tuberkulosis Sedunia", e: "🫁" }],
+    "03-27": [{ n: "Hari Teater Sedunia", e: "🎭" }],
+    "04-02": [{ n: "Hari Peduli Autisme Sedunia", e: "💙" }],
+    "04-07": [{ n: "Hari Kesehatan Sedunia", e: "🏥" }],
+    "04-12": [{ n: "Hari Penerbangan Antariksa Internasional", e: "🚀" }],
+    "04-22": [{ n: "Hari Bumi", e: "🌍" }],
+    "04-23": [{ n: "Hari Buku Sedunia", e: "📖" }],
+    "04-25": [{ n: "Hari Malaria Sedunia", e: "🦟" }],
+    "04-29": [{ n: "Hari Tari Internasional", e: "💃" }],
+    "04-30": [{ n: "Hari Jazz Internasional", e: "🎷" }],
+    "05-01": [{ n: "Hari Buruh Internasional", e: "👷" }],
+    "05-03": [{ n: "Hari Kebebasan Pers Sedunia", e: "📰" }],
+    "05-04": [{ n: "Hari Star Wars", e: "⭐" }],
+    "05-05": [{ n: "Hari Bidan Internasional", e: "👶" }],
+    "05-08": [{ n: "Hari Palang Merah Sedunia", e: "➕" }],
+    "05-12": [{ n: "Hari Perawat Internasional", e: "👩‍⚕️" }],
+    "05-15": [{ n: "Hari Keluarga Internasional", e: "👨‍👩‍👧" }],
+    "05-17": [{ n: "Hari Telekomunikasi Sedunia", e: "📡" }],
+    "05-18": [{ n: "Hari Museum Internasional", e: "🏛️" }],
+    "05-20": [{ n: "Hari Lebah Sedunia", e: "🐝" }],
+    "05-21": [{ n: "Hari Keanekaragaman Hayati", e: "🦋" }],
+    "05-29": [{ n: "Hari Penjaga Perdamaian Internasional", e: "🕊️" }],
+    "05-31": [{ n: "Hari Tanpa Tembakau Sedunia", e: "🚭" }],
+    "06-01": [{ n: "Hari Anak Internasional", e: "🧒" }],
+    "06-05": [{ n: "Hari Lingkungan Hidup Sedunia", e: "🌱" }],
+    "06-07": [{ n: "Hari Keamanan Pangan Sedunia", e: "🍎" }],
+    "06-08": [{ n: "Hari Laut Sedunia", e: "🌊" }],
+    "06-12": [{ n: "Hari Menentang Pekerja Anak Sedunia", e: "🚫" }],
+    "06-14": [{ n: "Hari Donor Darah Sedunia", e: "🩸" }],
+    "06-20": [{ n: "Hari Pengungsi Sedunia", e: "🏕️" }],
+    "06-21": [{ n: "Hari Yoga Internasional", e: "🧘" }],
+    "06-30": [{ n: "Hari Media Sosial Sedunia", e: "📱" }],
+    "07-11": [{ n: "Hari Kependudukan Sedunia", e: "👥" }],
+    "07-17": [{ n: "Hari Keadilan Internasional", e: "⚖️" }],
+    "07-18": [{ n: "Hari Mandela", e: "✊" }],
+    "07-28": [{ n: "Hari Hepatitis Sedunia", e: "💉" }],
+    "07-29": [{ n: "Hari Harimau Sedunia", e: "🐯" }],
+    "07-30": [{ n: "Hari Persahabatan Internasional", e: "🤝" }],
+    "08-09": [{ n: "Hari Masyarakat Adat Sedunia", e: "🪶" }],
+    "08-12": [{ n: "Hari Remaja Internasional", e: "🧑" }],
+    "08-13": [{ n: "Hari Kidal Sedunia", e: "✋" }],
+    "08-19": [{ n: "Hari Kemanusiaan Sedunia", e: "🤲" }],
+    "08-30": [{ n: "Hari Korban Hilang Internasional", e: "🕊️" }],
+    "09-08": [{ n: "Hari Literasi Internasional", e: "📝" }],
+    "09-15": [{ n: "Hari Demokrasi Internasional", e: "🗳️" }],
+    "09-16": [{ n: "Hari Ozon Sedunia", e: "🌎" }],
+    "09-21": [{ n: "Hari Perdamaian Sedunia", e: "☮️" }],
+    "09-26": [{ n: "Hari Kontrasepsi Sedunia", e: "💊" }],
+    "09-27": [{ n: "Hari Wisata Sedunia", e: "✈️" }],
+    "09-29": [{ n: "Hari Jantung Sedunia", e: "❤️" }],
+    "10-01": [{ n: "Hari Vegetarian Sedunia", e: "🥗" }, { n: "Hari Lansia Internasional", e: "👴" }],
+    "10-04": [{ n: "Hari Hewan Sedunia", e: "🐾" }],
+    "10-05": [{ n: "Hari Guru Sedunia", e: "👨‍🏫" }],
+    "10-09": [{ n: "Hari Pos Sedunia", e: "📮" }],
+    "10-10": [{ n: "Hari Kesehatan Mental Sedunia", e: "🧠" }],
+    "10-11": [{ n: "Hari Anak Perempuan Sedunia", e: "👧" }],
+    "10-13": [{ n: "Hari Pengurangan Risiko Bencana", e: "🌪️" }],
+    "10-16": [{ n: "Hari Pangan Sedunia", e: "🌾" }],
+    "10-17": [{ n: "Hari Pemberantasan Kemiskinan", e: "🤝" }],
+    "10-24": [{ n: "Hari Perserikatan Bangsa-Bangsa", e: "🇺🇳" }],
+    "10-31": [{ n: "Halloween", e: "🎃" }],
+    "11-10": [{ n: "Hari Sains Sedunia untuk Perdamaian", e: "🔭" }],
+    "11-12": [{ n: "Hari Pneumonia Sedunia", e: "🫁" }],
+    "11-14": [{ n: "Hari Diabetes Sedunia", e: "🩺" }],
+    "11-16": [{ n: "Hari Toleransi Internasional", e: "🕊️" }],
+    "11-19": [{ n: "Hari Pria Sedunia", e: "👨" }],
+    "11-20": [{ n: "Hari Anak Sedunia", e: "🧒" }],
+    "11-21": [{ n: "Hari Televisi Sedunia", e: "📺" }],
+    "11-25": [{ n: "Hari Anti Kekerasan terhadap Perempuan", e: "🎗️" }],
+    "11-29": [{ n: "Hari Solidaritas Palestina", e: "🇵🇸" }],
+    "12-01": [{ n: "Hari AIDS Sedunia", e: "🎗️" }],
+    "12-03": [{ n: "Hari Disabilitas Internasional", e: "♿" }],
+    "12-05": [{ n: "Hari Relawan Internasional", e: "🙋" }],
+    "12-07": [{ n: "Hari Penerbangan Sipil Internasional", e: "✈️" }],
+    "12-10": [{ n: "Hari Hak Asasi Manusia", e: "🕊️" }],
+    "12-11": [{ n: "Hari Gunung Internasional", e: "🏔️" }],
+    "12-18": [{ n: "Hari Migran Internasional", e: "🧳" }],
+    "12-20": [{ n: "Hari Solidaritas Manusia", e: "🤝" }],
+    "12-25": [{ n: "Hari Natal", e: "🎄" }],
+    "12-31": [{ n: "Malam Tahun Baru", e: "🎆" }]
+  };
+
+  const EVENT_MICROSTOCK_INFO = {
+    "01-01": { tips: "Tahun Baru adalah momen global. Buyer mencari visual resolusi, goal setting, dan perayaan. Coba buat ilustrasi flat tentang 'new year new me' dengan elemen jam, kalender, atau kembang api.", keywords: "new year resolution, goal setting, celebration, 2026, fresh start" },
+    "02-14": { tips: "Valentine bukan cuma soal pasangan. Galentine's Day (14 Feb) makin naik. Tren 2026: 'Pastel Nostalgia' dan 'Rouge Reimagined'. Coba ilustrasi love dengan warna netral (cream, beige) atau 3D inflated hearts.", keywords: "valentine, love, galentine, romantic, pastel heart, 3d heart" },
+    "03-08": { tips: "International Women's Day. Pasar cari visual 'hyper-authenticity' — wanita di bidang STEM yang terlihat nyata, bukan korporat kaku. Ilustrasi wanita coding, welding, atau memimpin proyek konstruksi.", keywords: "women empowerment, stem women, female leadership, diversity, strong woman" },
+    "03-20": { tips: "Hari Kebahagiaan Sedunia. Buyer cari visual positif: senyum, keluarga bahagia, alam cerah. Cocok buat ilustrasi flat yang cheerfull dengan warna cerah.", keywords: "happiness, smile, positive vibes, joy, happy family" },
+    "04-22": { tips: "Hari Bumi. Demand dari brand dan NGO terus tumbuh. Fokus ke sustainability: ilustrasi eco-friendly, daur ulang, energi hijau, atau alam yang asri.", keywords: "earth day, sustainability, eco friendly, green energy, recycle, environment" },
+    "05-01": { tips: "Hari Buruh. Buyer cari visual pekerja dari berbagai profesi. Ilustrasi pekerja konstruksi, kantor, atau remote worker. Hindari stereotip gender.", keywords: "labor day, worker, profession, construction, office worker" },
+    "06-05": { tips: "Hari Lingkungan Hidup. Sama seperti Earth Day tapi lebih fokus ke aksi: tanam pohon, bersih-bersih pantai, zero waste lifestyle.", keywords: "environment day, go green, tree planting, zero waste, climate action" },
+    "06-21": { tips: "Hari Yoga Internasional. Buyer cari visual mindfulness dan wellness. Ilustrasi orang meditasi, pose yoga, atau lanskap tenang. Warna soft pastel.", keywords: "yoga, meditation, mindfulness, wellness, zen, calm" },
+    "07-04": { tips: "US Independence Day. 2026 spesial: 250 tahun Amerika. Demand untuk visual patriotic (merah-putih-biru, bendera, kembang api) lebih besar dari biasanya.", keywords: "4th of july, independence day, usa 250, patriotic, fireworks, american flag" },
+    "08-17": { tips: "Hari Kemerdekaan Indonesia. Buyer global cari representasi Asia Tenggara. Visual merah putih, perayaan komunitas, atau lifestyle Indonesia autentik.", keywords: "indonesia independence day, 17 agustus, merdeka, red white, southeast asia" },
+    "09-21": { tips: "Hari Perdamaian Sedunia. Buyer cari visual simbol perdamaian: merpati, tangan berjabat, globe. Cocok untuk kampanye sosial.", keywords: "peace day, dove, handshake, global unity, harmony" },
+    "10-31": { tips: "Halloween. Pasar besar tapi kompetisi ketat. Tren 2026: narrative-driven, bukan sekadar pumpkin. Coba ilustrasi karakter (Frankenstein, drakula) dengan twist unik atau background spooky tapi aesthetic.", keywords: "halloween, spooky, pumpkin, witch, ghost, trick or treat, dark aesthetic" },
+    "11-27": { tips: "Thanksgiving. Buyer cari visual gratitude dan keluarga. Ilustrasi meja makan, turkey, atau fall vibes (daun maple, warna hangat).", keywords: "thanksgiving, gratitude, family dinner, turkey, fall harvest" },
+    "12-25": { tips: "Natal. Keyword paling banyak dicari kedua di microstock. Kompetisi sangat tinggi. Coba angle unik: 'diverse cultural holidays', 'festive travel', atau 'self-care Christmas' daripada sekadar pohon dan Santa.", keywords: "christmas, xmas, santa, christmas tree, holiday, winter, gift, festive" },
+    "12-31": { tips: "Malam Tahun Baru. Buyer cari visual countdown, pesta, kembang api. Coba ilustrasi jam mendekati 12, champagne toast, atau resolusi tahun baru.", keywords: "new year eve, countdown, party, fireworks, celebration, 2026" }
+  };
+
+  const CATEGORY_INFO_RULES = [
+    { test: /kesehatan|kanker|jantung|diabetes|aids|malaria|hepatitis|tuberkulosis|pneumonia|donor|mental|autisme|braille/i,
+      tips: "Event kesehatan selalu dicari brand farmasi, RS, dan NGO. Buat ilustrasi yang empatik — hindari visual seram. Fokus ke harapan, pencegahan, dan solidaritas.",
+      keywords: "health awareness, medical, healthcare, wellness, prevention" },
+    { test: /anak|remaja|perempuan|wanita|pria|lansia|disabilitas|kidal/i,
+      tips: "Event tentang manusia: penting representasi beragam (ras, usia, gender). Buyer global sensitif soal stereotip. Tampilkan subjek dengan dignity — bukan objek.",
+      keywords: "diversity, inclusion, empowerment, awareness day, human rights" },
+    { test: /lingkungan|bumi|hutan|air|laut|ozon|iklim|keanekaragaman|pohon|satwa|hewan|lebah|harimau|gunung|lahan basah|pangan/i,
+      tips: "Tema lingkungan demand tinggi dari brand eco. Ilustrasi flat atau 3D warna hijau-biru. Hindari visual doom — buyer cari solusi, bukan bencana.",
+      keywords: "environment, eco friendly, sustainability, nature, green living" },
+    { test: /budaya|bahasa|museum|teater|tari|jazz|buku|literasi|pendidikan|guru|sekolah/i,
+      tips: "Event budaya & edukasi: buyer dari institusi pendidikan. Ilustrasi hangat warna earthy. Tampilkan interaksi manusia, bukan sekadar objek.",
+      keywords: "culture, education, learning, art, tradition, literacy" },
+    { test: /perdamaian|hak asasi|keadilan|kemanusiaan|toleransi|solidaritas|pengungsi|migran|holocaust|mandela/i,
+      tips: "Event kemanusiaan: sensitif tapi demand tinggi dari NGO. Gunakan simbol universal (merpati, tangan, globe). Hindari visual konflik langsung.",
+      keywords: "peace, human rights, unity, justice, humanitarian" },
+    { test: /sains|teknologi|telekomunikasi|radio|internet|data|penerbangan|meteorologi|antariksa|matematika/i,
+      tips: "Event teknologi & sains: buyer dari perusahaan tech & edukasi. Gaya isometric atau flat warna biru-ungu. Fokus ke inovasi dan koneksi.",
+      keywords: "technology, science, innovation, digital, communication" },
+    { test: /pangan|makanan|gizi|pertanian|kacang|vegetarian|kopi/i,
+      tips: "Event pangan: buyer dari F&B, restoran, food blogger. Ilustrasi 3D atau flat lay warna hangat (oranye, kuning, merah). Fokus fresh & healthy.",
+      keywords: "food, nutrition, healthy eating, agriculture, fresh produce" },
+    { test: /buruh|pekerja|perawat|bidan|relawan|penjaga/i,
+      tips: "Event profesi: buyer cari visual pekerja beragam. Hindari stereotip gender. Tampilkan profesi dengan bangga, bukan lelah.",
+      keywords: "worker, profession, labor, healthcare worker, volunteer, hero" },
+    { test: /valentine|natal|tahun baru|halloween|paskah|thanksgiving|kemerdekaan|kebahagiaan/i,
+      tips: "Event perayaan: kompetisi ketat tapi volume pencarian besar. Coba angle unik (diverse celebration, self-care, cultural twist) daripada sekadar simbol umum.",
+      keywords: "celebration, holiday, festive, greeting, seasonal" },
+    { test: /keluarga|persahabatan|masyarakat|kependudukan/i,
+      tips: "Event sosial: buyer cari visual kehangatan komunitas. Ilustrasi orang berinteraksi, bukan berdiri sendiri. Warna hangat.",
+      keywords: "community, family, friendship, togetherness, social" },
+    { test: /tv|televisi|media|pers|pos|radio|sosial|telekomunikasi/i,
+      tips: "Event media: buyer dari industri kreatif & media. Gaya modern minimalis. Cocok untuk ilustrasi bertema informasi & komunikasi.",
+      keywords: "media, communication, broadcasting, press, information" },
+    { test: /konsumen|hukum|pajak|bea|hak/i,
+      tips: "Event hukum & konsumen: buyer dari institusi & advokasi. Gaya formal, warna netral. Simbol timbangan, kontrak, atau perlindungan.",
+      keywords: "law, justice, consumer rights, protection, legal" },
+    { test: /wisata|travel|penerbangan|migran/i,
+      tips: "Event travel & wisata: buyer dari agensi travel. Ilustrasi pemandangan indah, warna cerah. Fokus ke petualangan & eksplorasi.",
+      keywords: "travel, tourism, adventure, exploration, journey" },
+    { test: /.+/,
+      tips: "Event ini punya potensi global. Coba buat visual yang menghubungkan tema dengan momen — bukan cuma simbol. Buyer suka ilustrasi yang bisa dipakai banyak konteks.",
+      keywords: "awareness day, international day, celebration, global event" }
+  ];
+
+  function getMicrostockInfo(evName) {
+    for (const rule of CATEGORY_INFO_RULES) {
+      if (rule.test.test(evName)) {
+        return { tips: rule.tips, keywords: rule.keywords };
+      }
+    }
+    return null;
+  }
+
+  /* UTILITIES */
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function dateKey(y, m, d) { return `${y}-${pad2(m+1)}-${pad2(d)}`; }
+  function eventKey(m, d) { return `${pad2(m+1)}-${pad2(d)}`; }
+  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+  function parseNumOr(str, fallback) {
+    const v = parseInt(str, 10);
+    return Number.isFinite(v) ? v : fallback;
+  }
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
+  /* STATE */
+  const defaultState = () => ({
+    version: 3,
+    theme: 'auto',
+    viewYear: new Date().getFullYear(),
+    viewMonth: new Date().getMonth(),
+    settings: {
+      imagesPerDay: 3,
+      workDays: [1, 2, 3, 4, 5],
+      mode: 'split',
+      startHour: 9,
+      sketchMin: 30,
+      colorMin: 45,
+      uploadMin: 15
+    },
+    tasks: {},
+    customEvents: {},
+    notes: {}
+  });
+
+  let state = defaultState();
+
+  /* STORAGE */
+  function saveState() {
+    try {
+      pruneOldData();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('Save failed:', e);
+      toast('Gagal menyimpan data', 'error');
+    }
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return;
+      const def = defaultState();
+      state = {
+        ...def,
+        ...parsed,
+        settings: { ...def.settings, ...(parsed.settings || {}) },
+        tasks: parsed.tasks && typeof parsed.tasks === 'object' ? parsed.tasks : {},
+        customEvents: parsed.customEvents && typeof parsed.customEvents === 'object' ? parsed.customEvents : {},
+        notes: parsed.notes && typeof parsed.notes === 'object' ? parsed.notes : {}
+      };
+      state.settings.imagesPerDay = clamp(parseNumOr(state.settings.imagesPerDay, 3), 1, 50);
+      state.settings.startHour = clamp(parseNumOr(state.settings.startHour, 9), 0, 23);
+      state.settings.sketchMin = clamp(parseNumOr(state.settings.sketchMin, 30), 1, 999);
+      state.settings.colorMin = clamp(parseNumOr(state.settings.colorMin, 45), 1, 999);
+      state.settings.uploadMin = clamp(parseNumOr(state.settings.uploadMin, 15), 1, 999);
+      if (!Array.isArray(state.settings.workDays)) state.settings.workDays = [1,2,3,4,5];
+      if (state.settings.mode !== 'split' && state.settings.mode !== 'same') state.settings.mode = 'split';
+      if (!['auto','light','dark'].includes(state.theme)) state.theme = 'auto';
+    } catch (e) {
+      console.warn('Load failed:', e);
+      state = defaultState();
+    }
+  }
+
+  function pruneOldData() {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - MAX_MONTHS_KEPT);
+    const cutoffKey = `${cutoff.getFullYear()}-${pad2(cutoff.getMonth() + 1)}`;
+    for (const key of Object.keys(state.tasks)) {
+      if (key.slice(0, 7) < cutoffKey) delete state.tasks[key];
+    }
+    for (const key of Object.keys(state.notes)) {
+      if (key.slice(0, 7) < cutoffKey) delete state.notes[key];
+    }
+  }
+
+  /* EVENT LOOKUP */
+  function getEventsForDate(y, m, d) {
+    const ek = eventKey(m, d);
+    const builtIn = INTERNATIONAL_EVENTS[ek] || [];
+    const custom = state.customEvents[ek] || [];
+    return [...builtIn, ...custom];
+  }
+
+  /* SCHEDULE GENERATION */
+  function getWorkingDaysInMonth(year, month) {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const out = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      if (state.settings.workDays.includes(date.getDay())) out.push(d);
+    }
+    return out;
+  }
+
+  function addTaskToDate(y, m, d, type, count, done) {
+    const key = dateKey(y, m, d);
+    if (!state.tasks[key]) state.tasks[key] = [];
+    state.tasks[key].push({ id: uid(), type, count, done: done || 0 });
+  }
+
+  function clearMonthTasks(year, month) {
+    const prefix = `${year}-${pad2(month + 1)}`;
+    for (const key of Object.keys(state.tasks)) {
+      if (key.startsWith(prefix)) delete state.tasks[key];
+    }
+  }
+
+  function monthHasSchedule(year, month) {
+    const prefix = `${year}-${pad2(month + 1)}`;
+    return Object.keys(state.tasks).some(k => k.startsWith(prefix) && state.tasks[k].length);
+  }
+
+  function fillMonthSchedule(year, month) {
+    const workDays = state.settings.workDays;
+    if (!workDays.length) return false;
+    const days = getWorkingDaysInMonth(year, month);
+    if (!days.length) return false;
+    const N = state.settings.imagesPerDay;
+    const K = days.length;
+
+    if (state.settings.mode === 'same') {
+      days.forEach(d => {
+        addTaskToDate(year, month, d, 'sketch', N, 0);
+        addTaskToDate(year, month, d, 'color', N, 0);
+        addTaskToDate(year, month, d, 'upload', N, 0);
+      });
+    } else {
+      if (K === 1) {
+        addTaskToDate(year, month, days[0], 'sketch', N, 0);
+        addTaskToDate(year, month, days[0], 'color', N, 0);
+        addTaskToDate(year, month, days[0], 'upload', N, 0);
+      } else {
+        days.forEach(d => addTaskToDate(year, month, d, 'sketch', N, 0));
+        for (let i = 1; i < K; i++) addTaskToDate(year, month, days[i], 'color', N, 0);
+        for (let i = 2; i < K; i++) addTaskToDate(year, month, days[i], 'upload', N, 0);
+        const lastDay = days[K - 1];
+        addTaskToDate(year, month, lastDay, 'color', N, 0);
+        addTaskToDate(year, month, lastDay, 'upload', 2 * N, 0);
+      }
+    }
+    return true;
+  }
+
+  function generateSchedule(year, month) {
+    if (!state.settings.workDays.length) {
+      toast('Pilih minimal 1 hari kerja dulu', 'warn');
+      return;
+    }
+    const days = getWorkingDaysInMonth(year, month);
+    if (!days.length) {
+      toast('Tidak ada hari kerja di bulan ini', 'warn');
+      return;
+    }
+    if (monthHasSchedule(year, month)) {
+      if (!confirm(`Jadwal ${MONTHS[month]} ${year} sudah ada. Timpa?`)) return;
+    }
+    clearMonthTasks(year, month);
+    fillMonthSchedule(year, month);
+    saveState();
+    renderAll();
+    toast(`Jadwal ${MONTHS[month]} ${year} dibuat`, 'success');
+  }
+
+  /* TIME */
+  function computeTimes(tasks) {
+    const startMin = state.settings.startHour * 60;
+    let totalMin = 0;
+    const sorted = [...tasks].sort((a, b) => TASK_ORDER.indexOf(a.type) - TASK_ORDER.indexOf(b.type));
+    const result = [];
+    for (const t of sorted) {
+      const perImg = t.type === 'sketch' ? state.settings.sketchMin
+                   : t.type === 'color'  ? state.settings.colorMin
+                   : state.settings.uploadMin;
+      const dur = t.count * perImg;
+      const startAbs = startMin + totalMin;
+      const dayOffset = Math.floor(startAbs / 1440);
+      const h = Math.floor((startAbs % 1440) / 60);
+      const mn = startAbs % 60;
+      result.push({ ...t, start: `${pad2(h)}:${pad2(mn)}`, dur, dayOffset });
+      totalMin += dur;
+    }
+    return result;
+  }
+
+  /* RENDER */
+  function renderAll() {
+    renderCalendar();
+    renderStats();
+  }
+
+  function renderCalendar() {
+    const y = state.viewYear;
+    const m = state.viewMonth;
+    $('#monthTitle').textContent = `${MONTHS[m]} ${y}`;
+
+    const weekdays = $('#weekdays');
+    if (!weekdays.dataset.rendered) {
+      weekdays.innerHTML = '';
+      DAYS_SHORT.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'weekday';
+        el.textContent = d;
+        weekdays.appendChild(el);
+      });
+      weekdays.dataset.rendered = '1';
+    }
+
+    const grid = $('#calendarGrid');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(y, m, 1);
+    let offset = firstDay.getDay() - 1;
+    if (offset < 0) offset = 6;
+
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const prevMonthDays = new Date(y, m, 0).getDate();
+    const today = new Date();
+    const todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+
+    for (let i = offset - 1; i >= 0; i--) {
+      grid.appendChild(createDayCell(prevMonthDays - i, true, y, m - 1));
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el = createDayCell(d, false, y, m);
+      if (dateKey(y, m, d) === todayKey) el.classList.add('today');
+      grid.appendChild(el);
+    }
+    const total = offset + daysInMonth;
+    const remaining = (7 - (total % 7)) % 7;
+    for (let i = 1; i <= remaining; i++) {
+      grid.appendChild(createDayCell(i, true, y, m + 1));
+    }
+  }
+
+  function createDayCell(day, otherMonth, y, m) {
+    const date = new Date(y, m, day);
+    const yy = date.getFullYear();
+    const mm = date.getMonth();
+    const dd = date.getDate();
+    const key = dateKey(yy, mm, dd);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day';
+    if (otherMonth) btn.classList.add('other-month');
+    const dow = date.getDay();
+    if (dow === 0 || dow === 6) btn.classList.add('weekend');
+    btn.setAttribute('aria-label', `${DAYS_FULL[dow]}, ${dd} ${MONTHS[mm]} ${yy}`);
+
+    const numEl = document.createElement('div');
+    numEl.className = 'day-num';
+    numEl.textContent = dd;
+    btn.appendChild(numEl);
+
+    const evs = getEventsForDate(yy, mm, dd);
+    if (evs.length) {
+      const evWrap = document.createElement('div');
+      evWrap.className = 'day-events';
+      evs.slice(0, 3).forEach(e => {
+        const span = document.createElement('span');
+        span.className = 'day-event';
+        span.textContent = e.e;
+        span.title = e.n;
+        evWrap.appendChild(span);
+      });
+      btn.appendChild(evWrap);
+    }
+
+    const tasks = state.tasks[key] || [];
+    if (tasks.length) {
+      const totals = { sketch: 0, color: 0, upload: 0 };
+      const dones = { sketch: 0, color: 0, upload: 0 };
+      tasks.forEach(t => {
+        if (totals[t.type] !== undefined) {
+          totals[t.type] += t.count;
+          dones[t.type] += Math.min(t.done || 0, t.count);
+        }
+      });
+      const totalAll = totals.sketch + totals.color + totals.upload;
+      const doneAll = dones.sketch + dones.color + dones.upload;
+      if (totalAll > 0 && doneAll >= totalAll) btn.classList.add('all-done');
+
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'day-tasks';
+      TASK_ORDER.forEach(type => {
+        const total = totals[type];
+        const done = dones[type];
+        if (total === 0) return;
+        const showCount = Math.min(total, 6);
+        for (let i = 0; i < showCount; i++) {
+          const dot = document.createElement('span');
+          dot.className = `task-dot ${type}`;
+          if (i < Math.min(done, showCount)) dot.classList.add('done');
+          dotsWrap.appendChild(dot);
+        }
+      });
+      btn.appendChild(dotsWrap);
+
+      const badgesWrap = document.createElement('div');
+      badgesWrap.className = 'day-badges';
+      TASK_ORDER.forEach(type => {
+        if (totals[type] > 0) {
+          const b = document.createElement('span');
+          b.className = `badge ${type}`;
+          if (dones[type] >= totals[type]) b.classList.add('partial');
+          b.textContent = `${TASK_ICONS[type]}${dones[type]}/${totals[type]}`;
+          badgesWrap.appendChild(b);
+        }
+      });
+      btn.appendChild(badgesWrap);
+    }
+
+    btn.addEventListener('click', () => {
+      if (otherMonth) {
+        state.viewYear = yy;
+        state.viewMonth = mm;
+        renderAll();
+      } else {
+        openDayModal(yy, mm, dd);
+      }
+    });
+
+    return btn;
+  }
+
+  function renderStats() {
+    const prefix = `${state.viewYear}-${pad2(state.viewMonth + 1)}`;
+    let sketch = 0, color = 0, upload = 0;
+    let doneSketch = 0, doneColor = 0, doneUpload = 0;
+    for (const [key, arr] of Object.entries(state.tasks)) {
+      if (!key.startsWith(prefix)) continue;
+      for (const t of arr) {
+        const done = Math.min(t.done || 0, t.count);
+        if (t.type === 'sketch') { sketch += t.count; doneSketch += done; }
+        else if (t.type === 'color') { color += t.count; doneColor += done; }
+        else if (t.type === 'upload') { upload += t.count; doneUpload += done; }
+      }
+    }
+    $('#statSketch').textContent = sketch;
+    $('#statColor').textContent = color;
+    $('#statUpload').textContent = upload;
+    const total = sketch + color + upload;
+    const done = doneSketch + doneColor + doneUpload;
+    $('#statTotal').textContent = total;
+    $('#statDone').textContent = done;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    $('#statPercent').textContent = `${pct}%`;
+    $('#statsMonth').textContent = `${MONTHS_SHORT[state.viewMonth]} ${state.viewYear}`;
+    $('#monthProgress').style.width = `${pct}%`;
+  }
+
+  /* MODAL */
+  let currentModalDate = null;
+
+  function openDayModal(y, m, d) {
+    currentModalDate = { y, m, d };
+    const date = new Date(y, m, d);
+    const key = dateKey(y, m, d);
+
+    $('#modalDate').textContent = `${DAYS_FULL[date.getDay()]}, ${d} ${MONTHS[m]} ${y}`;
+    const tasks = state.tasks[key] || [];
+    const evs = getEventsForDate(y, m, d);
+
+    if (tasks.length) {
+      const times = computeTimes(tasks);
+      const totalMin = times.reduce((s, t) => s + t.dur, 0);
+      const h = Math.floor(totalMin / 60);
+      const mn = totalMin % 60;
+      $('#modalSubtitle').textContent = `Estimasi kerja: ${h > 0 ? h + ' jam ' : ''}${mn} menit`;
+    } else {
+      $('#modalSubtitle').textContent = 'Tidak ada jadwal menggambar';
+    }
+
+    renderModalEvents(y, m, d, evs);
+    renderModalTasks(key, tasks, evs);
+    $('#notesArea').value = state.notes[key] || '';
+    $('#eventAddForm').classList.remove('show');
+    $('#taskAddForm').classList.remove('show');
+
+    $('#modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('#modalClose').focus(), 50);
+  }
+
+  function closeModal() {
+    $('#modal').classList.remove('active');
+    document.body.style.overflow = '';
+    if (currentModalDate) {
+      const key = dateKey(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+      const notesVal = $('#notesArea').value.trim();
+      if (notesVal) state.notes[key] = notesVal;
+      else delete state.notes[key];
+      saveState();
+    }
+    currentModalDate = null;
+    renderAll();
+  }
+
+  function renderModalEvents(y, m, d, evs) {
+    const wrap = $('#modalEvents');
+    wrap.innerHTML = '';
+    if (!evs.length) {
+      wrap.innerHTML = '<p class="empty">Tidak ada event khusus hari ini.</p>';
+      return;
+    }
+    evs.forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'event-item';
+      const emojiSpan = document.createElement('span');
+      emojiSpan.className = 'event-emoji-lg';
+      emojiSpan.textContent = e.e || '📌';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'event-name';
+      nameSpan.textContent = e.n;
+      div.appendChild(emojiSpan);
+      div.appendChild(nameSpan);
+
+      if (e.custom && e.id) {
+        const btn = document.createElement('button');
+        btn.className = 'event-remove';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Hapus event');
+        btn.textContent = '×';
+        btn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          deleteCustomEvent(m, d, e.id);
+        });
+        div.appendChild(btn);
+      }
+      wrap.appendChild(div);
+    });
+  }
+
+  function renderMicrostockPanels(wrap, evs, y, m, d) {
+    if (!evs.length) return;
+    const ek = eventKey(m, d);
+    const overrideInfo = EVENT_MICROSTOCK_INFO[ek];
+    evs.forEach((ev, idx) => {
+      const info = (idx === 0 && overrideInfo) ? overrideInfo : getMicrostockInfo(ev.n);
+      if (!info) return;
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'microstock-info';
+      let html = `<div class="microstock-info-title">📈 ${escapeHtml(ev.e || '📌')} ${escapeHtml(ev.n)}</div>`;
+      html += `<div class="microstock-info-tips">${escapeHtml(info.tips)}</div>`;
+      if (info.keywords) {
+        html += `<div style="font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:4px;">🔑 Keyword potensial:</div>`;
+        html += `<div class="microstock-keywords">`;
+        info.keywords.split(', ').forEach(kw => {
+          html += `<span class="microstock-keyword">${escapeHtml(kw)}</span>`;
+        });
+        html += `</div>`;
+      }
+      infoDiv.innerHTML = html;
+      wrap.appendChild(infoDiv);
+    });
+  }
+
+  function renderModalTasks(key, tasks, evs) {
+    const wrap = $('#modalTasks');
+    wrap.innerHTML = '';
+
+    if (!tasks.length) {
+      wrap.innerHTML = '<p class="empty">Tidak ada jadwal menggambar. Klik "+ Tambah" untuk menambah manual.</p>';
+      if (currentModalDate && evs.length) {
+        renderMicrostockPanels(wrap, evs, currentModalDate.y, currentModalDate.m, currentModalDate.d);
+      }
+      return;
+    }
+
+    const times = computeTimes(tasks);
+    times.forEach(t => {
+      const div = document.createElement('div');
+      div.className = `task-item ${t.type}`;
+      if (t.done >= t.count) div.classList.add('complete');
+
+      const icon = document.createElement('span');
+      icon.className = 'task-icon';
+      icon.textContent = TASK_ICONS[t.type];
+      div.appendChild(icon);
+
+      const body = document.createElement('div');
+      body.className = 'task-body';
+
+      const nameRow = document.createElement('div');
+      nameRow.className = 'task-name';
+      nameRow.textContent = `${TASK_LABELS[t.type]} — ${t.count} gambar`;
+      const progressNum = document.createElement('span');
+      progressNum.className = 'task-progress-num';
+      progressNum.textContent = `${t.done}/${t.count}`;
+      nameRow.appendChild(progressNum);
+      body.appendChild(nameRow);
+
+      const meta = document.createElement('div');
+      meta.className = 'task-meta';
+      let metaText = `Mulai ${t.start}`;
+      if (t.dayOffset > 0) metaText += ` (+${t.dayOffset} hari)`;
+      metaText += ` • ${t.dur} menit`;
+      meta.textContent = metaText;
+      body.appendChild(meta);
+
+      const bar = document.createElement('div');
+      bar.className = 'task-bar';
+      const fill = document.createElement('div');
+      fill.className = 'task-bar-fill';
+      fill.style.width = `${t.count ? (t.done / t.count) * 100 : 0}%`;
+      bar.appendChild(fill);
+      body.appendChild(bar);
+
+      div.appendChild(body);
+
+      const actions = document.createElement('div');
+      actions.className = 'task-actions';
+
+      const decBtn = document.createElement('button');
+      decBtn.className = 'task-btn';
+      decBtn.type = 'button';
+      decBtn.setAttribute('aria-label', 'Kurangi progress');
+      decBtn.textContent = '−';
+      decBtn.disabled = t.done <= 0;
+      decBtn.addEventListener('click', (e) => { e.stopPropagation(); updateTaskProgress(t.id, -1); });
+
+      const incBtn = document.createElement('button');
+      incBtn.className = 'task-btn';
+      incBtn.type = 'button';
+      incBtn.setAttribute('aria-label', 'Tambah progress');
+      incBtn.textContent = '+';
+      incBtn.addEventListener('click', (e) => { e.stopPropagation(); updateTaskProgress(t.id, +1); });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'task-btn danger';
+      delBtn.type = 'button';
+      delBtn.setAttribute('aria-label', 'Hapus tugas');
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteTask(t.id); });
+
+      actions.appendChild(decBtn);
+      actions.appendChild(incBtn);
+      actions.appendChild(delBtn);
+      div.appendChild(actions);
+
+      wrap.appendChild(div);
+    });
+
+    const totalMin = times.reduce((s, t) => s + t.dur, 0);
+    const sum = document.createElement('div');
+    sum.className = 'total-summary';
+    sum.innerHTML = `Total estimasi: <strong>${Math.floor(totalMin / 60)} jam ${totalMin % 60} menit</strong>`;
+    wrap.appendChild(sum);
+
+    if (evs.length) {
+      const hint = document.createElement('div');
+      hint.className = 'idea-hint';
+      hint.innerHTML = `💡 <strong>Ide konten:</strong> manfaatkan momen <em>${escapeHtml(evs[0].n)}</em> untuk membuat vektor bertema ini.`;
+      wrap.appendChild(hint);
+    }
+
+    if (currentModalDate && evs.length) {
+      renderMicrostockPanels(wrap, evs, currentModalDate.y, currentModalDate.m, currentModalDate.d);
+    }
+  }
+
+  /* TASK MUTATIONS */
+  function updateTaskProgress(taskId, delta) {
+    if (!currentModalDate) return;
+    const key = dateKey(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+    const tasks = state.tasks[key] || [];
+    const t = tasks.find(x => x.id === taskId);
+    if (!t) return;
+    t.done = clamp((t.done || 0) + delta, 0, t.count);
+    saveState();
+    renderModalTasks(key, tasks, getEventsForDate(currentModalDate.y, currentModalDate.m, currentModalDate.d));
+    renderAll();
+    if (t.done === t.count) toast(`${TASK_LABELS[t.type]} selesai! 🎉`, 'success');
+  }
+
+  function deleteTask(taskId) {
+    if (!currentModalDate) return;
+    const key = dateKey(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+    const tasks = state.tasks[key] || [];
+    const idx = tasks.findIndex(x => x.id === taskId);
+    if (idx < 0) return;
+    tasks.splice(idx, 1);
+    if (!tasks.length) delete state.tasks[key];
+    saveState();
+    openDayModal(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+    renderAll();
+  }
+
+  function addTaskManual(type, count) {
+    if (!currentModalDate) return;
+    const { y, m, d } = currentModalDate;
+    addTaskToDate(y, m, d, type, count, 0);
+    saveState();
+    openDayModal(y, m, d);
+    renderAll();
+  }
+
+  /* CUSTOM EVENTS */
+  function addCustomEvent(m, d, name, emoji) {
+    const ek = eventKey(m, d);
+    if (!state.customEvents[ek]) state.customEvents[ek] = [];
+    state.customEvents[ek].push({ id: uid(), n: name, e: emoji || '📌', custom: true });
+    saveState();
+  }
+
+  function deleteCustomEvent(m, d, id) {
+    const ek = eventKey(m, d);
+    if (!state.customEvents[ek]) return;
+    state.customEvents[ek] = state.customEvents[ek].filter(e => e.id !== id);
+    if (!state.customEvents[ek].length) delete state.customEvents[ek];
+    saveState();
+    openDayModal(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+    renderAll();
+  }
+
+  /* TOAST */
+  function toast(msg, type) {
+    const container = $('#toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type || ''}`;
+    const iconMap = { success: '✅', error: '❌', warn: '⚠️', '': 'ℹ️' };
+    el.innerHTML = `<span class="toast-icon">${iconMap[type] || 'ℹ️'}</span><span class="toast-body">${escapeHtml(msg)}</span>`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('out');
+      setTimeout(() => el.remove(), 300);
+    }, 2800);
+  }
+
+  /* THEME */
+  function applyTheme() {
+    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effective = state.theme === 'auto' ? (sysDark ? 'dark' : 'light') : state.theme;
+    document.documentElement.setAttribute('data-theme', effective);
+    const btn = $('#themeBtn');
+    if (btn) btn.textContent = effective === 'dark' ? '☀️' : '🌙';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', effective === 'dark' ? '#0b1220' : '#6366f1');
+  }
+
+  function cycleTheme() {
+    const order = ['auto', 'light', 'dark'];
+    const idx = order.indexOf(state.theme);
+    state.theme = order[(idx + 1) % order.length];
+    applyTheme();
+    saveState();
+    toast(`Tema: ${state.theme === 'auto' ? 'Otomatis' : state.theme === 'dark' ? 'Gelap' : 'Terang'}`, 'success');
+  }
+
+  /* SEARCH */
+  function renderSearch(query) {
+    const q = query.trim().toLowerCase();
+    const resultsEl = $('#searchResults');
+    const clearBtn = $('#searchClear');
+    if (!q) {
+      resultsEl.classList.remove('show');
+      clearBtn.classList.remove('show');
+      return;
+    }
+    clearBtn.classList.add('show');
+    const matches = [];
+    for (const [ek, arr] of Object.entries(INTERNATIONAL_EVENTS)) {
+      const [mm, dd] = ek.split('-').map(n => parseInt(n, 10));
+      for (const ev of arr) {
+        if (ev.n.toLowerCase().includes(q)) {
+          matches.push({ m: mm - 1, d: dd, e: ev.e, n: ev.n });
+        }
+      }
+    }
+    for (const [ek, arr] of Object.entries(state.customEvents)) {
+      const [mm, dd] = ek.split('-').map(n => parseInt(n, 10));
+      for (const ev of arr) {
+        if (ev.n.toLowerCase().includes(q)) {
+          matches.push({ m: mm - 1, d: dd, e: ev.e, n: ev.n });
+        }
+      }
+    }
+    if (!matches.length) {
+      resultsEl.innerHTML = '<div class="search-empty">Tidak ada event yang cocok</div>';
+      resultsEl.classList.add('show');
+      return;
+    }
+    matches.sort((a, b) => (a.m * 31 + a.d) - (b.m * 31 + b.d));
+    resultsEl.innerHTML = '';
+    matches.slice(0, 30).forEach(mt => {
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      div.innerHTML = `
+        <span class="search-result-emoji">${escapeHtml(mt.e)}</span>
+        <div class="search-result-body">
+          <div class="search-result-name">${escapeHtml(mt.n)}</div>
+          <div class="search-result-date">${mt.d} ${MONTHS[mt.m]}</div>
+        </div>
+      `;
+      div.addEventListener('click', () => {
+        state.viewYear = new Date().getFullYear();
+        state.viewMonth = mt.m;
+        renderAll();
+        setTimeout(() => {
+          const cells = $$('.day', $('#calendarGrid'));
+          for (const c of cells) {
+            const num = parseInt(c.querySelector('.day-num')?.textContent || '0', 10);
+            if (!c.classList.contains('other-month') && num === mt.d) {
+              c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              c.style.transition = 'box-shadow .3s';
+              c.style.boxShadow = '0 0 0 3px var(--primary)';
+              setTimeout(() => { c.style.boxShadow = ''; }, 1500);
+              break;
+            }
+          }
+        }, 100);
+        resultsEl.classList.remove('show');
+      });
+      resultsEl.appendChild(div);
+    });
+    resultsEl.classList.add('show');
+  }
+
+  /* EXPORT / IMPORT */
+  function exportData() {
+    try {
+      const data = JSON.stringify(state, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `microstock-planner-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('Data di-export', 'success');
+    } catch (e) {
+      toast('Gagal export', 'error');
+    }
+  }
+
+  function importData(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid');
+        if (!confirm('Import akan menimpa data saat ini. Lanjutkan?')) return;
+        const def = defaultState();
+        state = {
+          ...def,
+          ...parsed,
+          settings: { ...def.settings, ...(parsed.settings || {}) },
+          tasks: parsed.tasks || {},
+          customEvents: parsed.customEvents || {},
+          notes: parsed.notes || {}
+        };
+        saveState();
+        applyTheme();
+        bindSettingsUI();
+        renderAll();
+        toast('Data di-import', 'success');
+      } catch (err) {
+        toast('File tidak valid', 'error');
+      }
+    };
+    reader.onerror = () => toast('Gagal baca file', 'error');
+    reader.readAsText(file);
+  }
+
+  /* SETTINGS UI */
+  function renderWorkdays() {
+    const wrap = $('#workdays');
+    wrap.innerHTML = '';
+    WORKDAY_ORDER.forEach(day => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      btn.textContent = DAYS_SHORT[day === 0 ? 6 : day - 1];
+      btn.setAttribute('aria-pressed', state.settings.workDays.includes(day));
+      if (state.settings.workDays.includes(day)) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        const idx = state.settings.workDays.indexOf(day);
+        if (idx >= 0) state.settings.workDays.splice(idx, 1);
+        else state.settings.workDays.push(day);
+        renderWorkdays();
+        updateWdCount();
+        saveState();
+      });
+      wrap.appendChild(btn);
+    });
+    updateWdCount();
+  }
+
+  function updateWdCount() {
+    const el = $('#wdCount');
+    if (el) el.textContent = `(${state.settings.workDays.length} hari)`;
+  }
+
+  function bindSettingsUI() {
+    $('#imagesPerDay').value = state.settings.imagesPerDay;
+    $('#startHour').value = state.settings.startHour;
+    $('#sketchMin').value = state.settings.sketchMin;
+    $('#colorMin').value = state.settings.colorMin;
+    $('#uploadMin').value = state.settings.uploadMin;
+    const modeRadio = document.querySelector(`input[name="mode"][value="${state.settings.mode}"]`);
+    if (modeRadio) modeRadio.checked = true;
+    else {
+      const first = document.querySelector('input[name="mode"]');
+      if (first) first.checked = true;
+    }
+    renderWorkdays();
+  }
+
+  function onSettingsChange() {
+    saveState();
+    if (monthHasSchedule(state.viewYear, state.viewMonth)) {
+      clearMonthTasks(state.viewYear, state.viewMonth);
+      if (fillMonthSchedule(state.viewYear, state.viewMonth)) renderAll();
+    }
+  }
+
+  function bindSettingsInputs() {
+    const numericInputs = [
+      ['imagesPerDay', 'imagesPerDay', 1, 50],
+      ['startHour', 'startHour', 0, 23],
+      ['sketchMin', 'sketchMin', 1, 999],
+      ['colorMin', 'colorMin', 1, 999],
+      ['uploadMin', 'uploadMin', 1, 999]
+    ];
+    numericInputs.forEach(([id, key, min, max]) => {
+      const el = $('#' + id);
+      el.addEventListener('change', () => {
+        const v = clamp(parseNumOr(el.value, state.settings[key]), min, max);
+        state.settings[key] = v;
+        el.value = v;
+        onSettingsChange();
+      });
+      el.addEventListener('blur', () => {
+        const v = clamp(parseNumOr(el.value, state.settings[key]), min, max);
+        state.settings[key] = v;
+        el.value = v;
+        saveState();
+      });
+    });
+    $$('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          state.settings.mode = e.target.value;
+          onSettingsChange();
+        }
+      });
+    });
+  }
+
+  /* DRAWER */
+  function openDrawer() {
+    $('#settingsPanel').classList.add('open');
+    $('#drawerBackdrop').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    $('#settingsPanel').classList.remove('open');
+    $('#drawerBackdrop').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  /* EVENT BINDING */
+  function bindGlobalEvents() {
+    $('#themeBtn').addEventListener('click', cycleTheme);
+    $('#menuBtn').addEventListener('click', openDrawer);
+    $('#settingsClose').addEventListener('click', closeDrawer);
+    $('#drawerBackdrop').addEventListener('click', closeDrawer);
+
+    $('#prevMonth').addEventListener('click', () => {
+      state.viewMonth--;
+      if (state.viewMonth < 0) { state.viewMonth = 11; state.viewYear--; }
+      renderAll();
+    });
+    $('#nextMonth').addEventListener('click', () => {
+      state.viewMonth++;
+      if (state.viewMonth > 11) { state.viewMonth = 0; state.viewYear++; }
+      renderAll();
+    });
+    $('#todayBtn').addEventListener('click', () => {
+      const now = new Date();
+      state.viewYear = now.getFullYear();
+      state.viewMonth = now.getMonth();
+      renderAll();
+      toast('Kembali ke hari ini', 'success');
+    });
+
+    $('#generateBtn').addEventListener('click', () => {
+      generateSchedule(state.viewYear, state.viewMonth);
+      if (window.innerWidth < 1024) closeDrawer();
+    });
+    $('#clearBtn').addEventListener('click', () => {
+      if (!monthHasSchedule(state.viewYear, state.viewMonth)) {
+        toast('Belum ada jadwal untuk dihapus', 'warn');
+        return;
+      }
+      if (confirm(`Hapus semua jadwal ${MONTHS[state.viewMonth]} ${state.viewYear}?`)) {
+        clearMonthTasks(state.viewYear, state.viewMonth);
+        saveState();
+        renderAll();
+        toast('Jadwal dihapus', 'success');
+      }
+    });
+
+    $('#exportBtn').addEventListener('click', exportData);
+    $('#importBtn').addEventListener('click', () => $('#importFile').click());
+    $('#importFile').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) importData(file);
+      e.target.value = '';
+    });
+
+    let searchTimer;
+    $('#searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      const val = e.target.value;
+      searchTimer = setTimeout(() => renderSearch(val), 150);
+    });
+    $('#searchClear').addEventListener('click', () => {
+      $('#searchInput').value = '';
+      renderSearch('');
+    });
+
+    $('#modalClose').addEventListener('click', closeModal);
+    $('#modal').addEventListener('click', (e) => {
+      if (e.target === $('#modal')) closeModal();
+    });
+
+    $('#notesArea').addEventListener('blur', () => {
+      if (!currentModalDate) return;
+      const key = dateKey(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+      const v = $('#notesArea').value.trim();
+      if (v) state.notes[key] = v;
+      else delete state.notes[key];
+      saveState();
+    });
+
+    $('#addEventBtn').addEventListener('click', () => {
+      const form = $('#eventAddForm');
+      form.classList.toggle('show');
+      if (form.classList.contains('show')) {
+        renderEmojiQuick();
+        $('#eventNameInput').focus();
+      }
+    });
+    $('#eventSaveBtn').addEventListener('click', () => {
+      if (!currentModalDate) return;
+      const name = $('#eventNameInput').value.trim();
+      const emoji = $('#eventEmojiInput').value.trim() || '📌';
+      if (!name) { toast('Nama event kosong', 'warn'); return; }
+      addCustomEvent(currentModalDate.m, currentModalDate.d, name, emoji);
+      $('#eventNameInput').value = '';
+      $('#eventEmojiInput').value = '';
+      $('#eventAddForm').classList.remove('show');
+      toast('Event ditambahkan', 'success');
+      openDayModal(currentModalDate.y, currentModalDate.m, currentModalDate.d);
+      renderAll();
+    });
+
+    $('#addTaskBtn').addEventListener('click', () => {
+      $('#taskAddForm').classList.toggle('show');
+      if ($('#taskAddForm').classList.contains('show')) {
+        $('#taskCountInput').value = state.settings.imagesPerDay;
+        $('#taskTypeInput').focus();
+      }
+    });
+    $('#taskCancelBtn').addEventListener('click', () => {
+      $('#taskAddForm').classList.remove('show');
+    });
+    $('#taskSaveBtn').addEventListener('click', () => {
+      const type = $('#taskTypeInput').value;
+      const count = clamp(parseNumOr($('#taskCountInput').value, 1), 1, 99);
+      if (!TASK_ORDER.includes(type)) return;
+      addTaskManual(type, count);
+      $('#taskAddForm').classList.remove('show');
+      toast('Tugas ditambahkan', 'success');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if ($('#modal').classList.contains('active')) closeModal();
+        else if ($('#settingsPanel').classList.contains('open')) closeDrawer();
+      }
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (e.key === 'ArrowLeft' && !$('#modal').classList.contains('active')) {
+        $('#prevMonth').click();
+      } else if (e.key === 'ArrowRight' && !$('#modal').classList.contains('active')) {
+        $('#nextMonth').click();
+      }
+    });
+
+    if (window.matchMedia) {
+      try {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          if (state.theme === 'auto') applyTheme();
+        });
+      } catch (e) {}
+    }
+  }
+
+  function renderEmojiQuick() {
+    const wrap = $('#emojiQuick');
+    if (!wrap || wrap.dataset.rendered) return;
+    wrap.innerHTML = '';
+    QUICK_EMOJIS.forEach(emoji => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = emoji;
+      b.setAttribute('aria-label', 'Pilih ' + emoji);
+      b.addEventListener('click', () => {
+        $('#eventEmojiInput').value = emoji;
+        $('#eventNameInput').focus();
+      });
+      wrap.appendChild(b);
+    });
+    wrap.dataset.rendered = '1';
+  }
+
+  /* INIT */
+  function init() {
+    try {
+      loadState();
+      applyTheme();
+      bindSettingsUI();
+      bindSettingsInputs();
+      bindGlobalEvents();
+      renderAll();
+      const now = new Date();
+      if (state.viewYear === now.getFullYear() && state.viewMonth === now.getMonth()) {
+        setTimeout(() => {
+          const todayCell = $('.day.today');
+          if (todayCell) todayCell.scrollIntoView({ block: 'nearest' });
+        }, 100);
+      }
+    } catch (e) {
+      console.error('Init error:', e);
+      document.body.innerHTML += `<div style="padding:20px;color:#ef4444;">Terjadi kesalahan saat memuat. Refresh halaman.</div>`;
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<!-- TWA-GENERATOR:START (auto-generated, jangan edit manual) -->
+    <script>
+      // Theme color runtime (auto switch light/dark)
+      (function(){
+      var meta = document.querySelector('meta[name="theme-color"]');
+      var light = '#f5f5f9';
+      var dark = '#0a0a0f';
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        document.head.appendChild(meta);
+      }
+      function applyThemeColor(isDark){
+        meta.setAttribute('content', isDark ? dark : light);
+      }
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      applyThemeColor(mq.matches);
+      if (mq.addEventListener) {
+        mq.addEventListener('change', function(e){ applyThemeColor(e.matches); });
+      } else if (mq.addListener) {
+        mq.addListener(function(e){ applyThemeColor(e.matches); });
+      }
+    })();
+    </script>
+    <script>
+      // Service worker registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/serviceworker.js')
+            .then(function (reg) { console.log('[TWA] Service Worker registered. Scope:', reg.scope); })
+            .catch(function (err) { console.error('[TWA] Service Worker failed:', err); });
+        });
+      }
+    </script>
+<!-- TWA-GENERATOR:END -->
+</body>
+</html>
